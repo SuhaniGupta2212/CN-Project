@@ -5,142 +5,154 @@ import java.util.*;
 
 /**
  * Layer-2 Switch with Address Learning.
- *
- * Behaviours:
- *  • Learns source MAC → port mapping on every received frame.
- *  • Forwards unicast frames only to the known destination port.
- *  • Floods frames whose destination MAC is unknown (or broadcast FF:FF:FF:FF:FF:FF).
- *  • Tracks broadcast domains and collision domains.
  */
 public class Switch {
 
     public final String name;
-    // port number → connected DLLNode
+
+    // port → node
     private final Map<Integer, DLLNode> ports = new LinkedHashMap<>();
-    // MAC address → port number  (the learning table)
+
+    // MAC → port (learning table)
     private final Map<String, Integer> macTable = new LinkedHashMap<>();
 
     private int totalFramesForwarded = 0;
-    private int totalBroadcasts      = 0;
-    private int totalCollisionsDomains = 0; // one per port
+    private int totalBroadcasts = 0;
 
     public Switch(String name) {
         this.name = name;
     }
 
-    /** Connect a DLLNode to the next available port */
+    // ================================
+    // CONNECT DEVICE
+    // ================================
     public int connect(DLLNode node) {
         int port = ports.size() + 1;
         ports.put(port, node);
-        System.out.printf("  [SWITCH %s] Port %-2d ← connected to %s%n", name, port, node);
+
+        System.out.printf("  [SWITCH %s] Port %-2d ← connected to %s%n",
+                name, port, node.name);
+
         return port;
     }
 
-    /** Connect another Switch (for inter-switch links) */
-    public int connectSwitch(DLLNode pseudoPort) {
-        return connect(pseudoPort);
-    }
-
-    /** Print the current MAC Address Table */
+    // ================================
+    // MAC TABLE
+    // ================================
     public void printMACTable() {
-        System.out.printf("%n  ╔══════════════════════════════════╗%n");
-        System.out.printf("  ║   Switch %s — MAC Address Table  ║%n", name);
-        System.out.printf("  ╠══════════════╦═══════════════════╣%n");
-        System.out.printf("  ║    MAC       ║  Port             ║%n");
-        System.out.printf("  ╠══════════════╬═══════════════════╣%n");
+        System.out.println("\n=== MAC TABLE ===");
+
         if (macTable.isEmpty()) {
-            System.out.printf("  ║    (empty)                       ║%n");
-        } else {
-            macTable.forEach((mac, port) -> {
-                DLLNode node = ports.get(port);
-                String nodeName = (node != null) ? node.name : "?";
-                System.out.printf("  ║  %-12s║  Port %-2d (%s)%n", mac, port, nodeName);
-            });
-        }
-        System.out.printf("  ╚══════════════╩═══════════════════╝%n");
-    }
-
-    /** Print domain summary */
-    public void printDomainSummary() {
-        int numPorts = ports.size();
-        System.out.printf("%n  ╔══════════════════════════════════╗%n");
-        System.out.printf("  ║  Switch %s — Domain Summary      ║%n", name);
-        System.out.printf("  ╠══════════════════════════════════╣%n");
-        System.out.printf("  ║  Broadcast Domains  : %-3d         ║%n", 1);
-        System.out.printf("  ║  Collision Domains  : %-3d         ║%n", numPorts);
-        System.out.printf("  ║  (1 per port — full-duplex)      ║%n");
-        System.out.printf("  ╚══════════════════════════════════╝%n");
-    }
-
-    /**
-     * Core switch logic: receive a frame on a port, learn, then forward.
-     * @param incomingFrame  the frame received
-     * @param senderNode     the node that sent it (to identify the incoming port)
-     */
-    public void processFrame(Frame incomingFrame, DLLNode senderNode) {
-        int inPort = getPortOf(senderNode);
-
-        System.out.printf("%n  [SWITCH %s] 📥 Frame received on Port %d: %s%n",
-                name, inPort, incomingFrame);
-
-        // ADDRESS LEARNING
-        if (!macTable.containsKey(incomingFrame.srcMAC)) {
-            macTable.put(incomingFrame.srcMAC, inPort);
-            System.out.printf("  [SWITCH %s] 📚 Learned: MAC %s → Port %d%n",
-                    name, incomingFrame.srcMAC, inPort);
-        }
-
-        // BROADCAST
-        if (incomingFrame.destMAC.equals("FF:FF:FF:FF:FF:FF")) {
-            System.out.printf("  [SWITCH %s] 📢 Broadcast frame — flooding all ports except Port %d%n",
-                    name, inPort);
-            totalBroadcasts++;
-            for (Map.Entry<Integer, DLLNode> e : ports.entrySet()) {
-                if (e.getKey() != inPort) {
-                    e.getValue().receive(incomingFrame);
-                    System.out.printf("  [SWITCH %s] ➡️  Forwarded to Port %d (%s)%n",
-                            name, e.getKey(), e.getValue().name);
-                }
-            }
+            System.out.println("(empty)");
             return;
         }
 
-        // UNICAST: look up destination
-        Integer destPort = macTable.get(incomingFrame.destMAC);
+        for (Map.Entry<String, Integer> e : macTable.entrySet()) {
+            DLLNode node = ports.get(e.getValue());
+            System.out.println(e.getKey() + " → Port " + e.getValue()
+                    + " (" + node.name + ")");
+        }
+    }
 
-        if (destPort == null) {
-            // Unknown MAC → flood
-            System.out.printf("  [SWITCH %s] ❓ Unknown dest MAC %s → flooding%n",
-                    name, incomingFrame.destMAC);
+    // ================================
+    // DOMAIN SUMMARY
+    // ================================
+    public void printDomainSummary() {
+        System.out.println("\n=== DOMAIN SUMMARY ===");
+        System.out.println("Broadcast Domains: 1");
+        System.out.println("Collision Domains: " + ports.size());
+    }
+
+    // ================================
+    // CORE LOGIC
+    // ================================
+    public void processFrame(Frame f, DLLNode sender) {
+
+        int inPort = getPort(sender);
+
+        System.out.printf("\n  [SWITCH %s] 📥 Frame received on Port %d: %s%n",
+                name, inPort, f);
+
+        // ================================
+        // LEARNING
+        // ================================
+        if (!macTable.containsKey(f.srcMAC)) {
+            macTable.put(f.srcMAC, inPort);
+
+            System.out.printf("  [SWITCH %s] 📚 Learned: %s → Port %d%n",
+                    name, f.srcMAC, inPort);
+        }
+
+        // ================================
+        // BROADCAST
+        // ================================
+        if (f.destMAC.equals("FF:FF:FF:FF:FF:FF")) {
+
+            System.out.printf("  [SWITCH %s] 📢 Broadcast → flooding%n", name);
+
             for (Map.Entry<Integer, DLLNode> e : ports.entrySet()) {
                 if (e.getKey() != inPort) {
-                    e.getValue().receive(incomingFrame);
-                    System.out.printf("  [SWITCH %s] ➡️  Forwarded (flood) to Port %d (%s)%n",
+
+                    System.out.printf("  [SWITCH %s] ➡️  Forwarded to Port %d (%s)%n",
                             name, e.getKey(), e.getValue().name);
+
+                    e.getValue().receive(f);   // ✅ AFTER print
                 }
             }
-        } else if (destPort == inPort) {
-            // Same port — discard (filtering)
-            System.out.printf("  [SWITCH %s] 🚫 Source and dest on same port %d — frame filtered%n",
-                    name, inPort);
-        } else {
-            // Forward to known port only
+
+            totalBroadcasts++;
+            return;
+        }
+
+        // ================================
+        // UNICAST
+        // ================================
+        Integer destPort = macTable.get(f.destMAC);
+
+        // UNKNOWN → FLOOD
+        if (destPort == null) {
+
+            System.out.printf("  [SWITCH %s] ❓ Unknown dest %s → flooding%n",
+                    name, f.destMAC);
+
+            for (Map.Entry<Integer, DLLNode> e : ports.entrySet()) {
+                if (e.getKey() != inPort) {
+
+                    System.out.printf("  [SWITCH %s] ➡️  Forwarded (flood) to Port %d (%s)%n",
+                            name, e.getKey(), e.getValue().name);
+
+                    e.getValue().receive(f);   // ✅ AFTER print
+                }
+            }
+        }
+
+        // SAME PORT → DROP
+        else if (destPort == inPort) {
+
+            System.out.printf("  [SWITCH %s] 🚫 Same port → frame dropped%n", name);
+        }
+
+        // KNOWN → DIRECT UNICAST
+        else {
+
             DLLNode destNode = ports.get(destPort);
-            destNode.receive(incomingFrame);
+
             System.out.printf("  [SWITCH %s] ✅ Forwarded to Port %d (%s)%n",
                     name, destPort, destNode.name);
+
+            destNode.receive(f);   // ✅ AFTER print
+
             totalFramesForwarded++;
         }
     }
 
-    private int getPortOf(DLLNode node) {
+    // ================================
+    // HELPER
+    // ================================
+    private int getPort(DLLNode node) {
         for (Map.Entry<Integer, DLLNode> e : ports.entrySet()) {
             if (e.getValue() == node) return e.getKey();
         }
         return -1;
     }
-
-    public Map<Integer, DLLNode> getPorts() { return ports; }
-    public Map<String, Integer>  getMacTable() { return macTable; }
-    public int getPortCount() { return ports.size(); }
 }

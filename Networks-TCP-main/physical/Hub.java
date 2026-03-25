@@ -1,22 +1,29 @@
 package physical;
 
 import java.util.*;
-import main.Data;
-import main.EndStation;
+import main.*;
 
-public class Hub{
-    List<EndStation> ll = new ArrayList<>();
+public class Hub {
 
-    public void connect(EndStation s){
-        ll.add(s);
+    public String name;
+    List<EndStation> devices = new ArrayList<>();
+
+    // ✅ ADD THIS CONSTRUCTOR
+    public Hub(String name) {
+        this.name = name;
     }
 
-    public void receiveAndTransmit(Data d , EndStation s){ // it will get data d , which it is sent by station s
-        System.out.println("Data recieved");
+    public void connect(EndStation s) {
+        devices.add(s);
+    }
 
-        for(EndStation i : ll){
-            if(i!=s){
-                i.check(d);
+    public void receiveAndTransmit(Data d, EndStation sender) {
+
+        System.out.println("\n[HUB " + name + "] Broadcasting...");
+
+        for (EndStation s : devices) {
+            if (s != sender) {
+                s.check(d);
             }
         }
     }
