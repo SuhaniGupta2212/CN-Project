@@ -22,28 +22,24 @@ public class DLLNode {
     /** Called by Switch/Bridge when forwarding a frame to this node */
  public void receive(Frame f) {
 
-    // Accept only if:
-    // 1. It is meant for this node
-    // 2. OR it is broadcast
-    if (!this.mac.equals(f.destMAC) &&
-        !f.destMAC.equals("FF:FF:FF:FF:FF:FF")) {
-        return; // ignore silently
-    }
+    // ✅ Accept only if:
+    // 1. MAC matches
+    // 2. OR broadcast
 
-    System.out.println("\n[RECEIVER " + name + "] Frame arrived");
+    if (f.destMAC.equals(this.mac) ||
+        f.destMAC.equals("FF:FF:FF:FF:FF:FF")) {
 
-    // ✔ Checksum verification at RECEIVER (correct place)
-    boolean ok = ChecksumControl.verify(f);
+        System.out.println("✔ " + name + " ACCEPTED frame");
 
-    if (ok) {
-    System.out.println("[RECEIVER " + name + "] ✔ Checksum OK");
+        // checksum verify
+        if (ChecksumControl.verify(f)) {
+            System.out.println("   Checksum OK ");
+        } else {
+            System.out.println("   Checksum ERROR ");
+        }
 
-    inbox.add(f);   // ✅ ADD THIS LINE
-
-    System.out.println(name + " received: " + f.data);
-}
-    else {
-        System.out.println("[RECEIVER " + name + "] ❌ Corrupted -> Dropped");
+    } else {
+        System.out.println(name + " ignored frame");
     }
 }
     /** Pull all received frames (clears the buffer) */

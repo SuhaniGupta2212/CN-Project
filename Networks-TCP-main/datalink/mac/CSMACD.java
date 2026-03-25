@@ -20,87 +20,92 @@ public class CSMACD {
 
     private static boolean channelBusy = false;
     private static final Set<String> transmitting = new HashSet<>();
-    private static final Random rng = new Random(42);
+    private static final Random rng = new Random();
 
     private static final int MAX_RETRIES = 10;
-    private static final int SLOT_TIME_MS = 100; // simulated slot time (ms)
+    private static final int TRANSMISSION_TIME = 5; // simulated time units
 
-    /** Reset shared medium state between test scenarios */
-    public static void reset() {
-        channelBusy = false;
-        transmitting.clear();
-    }
+    public static void transmit(String sender, String data) {
 
-    /**
-     * Attempt to acquire the channel for `senderMAC`.
-     * Returns true if transmission can proceed (no persistent collision).
-     * Prints the full CSMA/CD trace.
-     */
-    public static boolean transmit(String senderName, String senderMAC) {
-        System.out.println("\n  [CSMA/CD] " + senderName + " wants to transmit...");
+        int attempt = 0;
 
-        for (int attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+        while (attempt < MAX_RETRIES) {
 
-            // 1. CARRIER SENSE
-            if (channelBusy) {
-                System.out.printf("  [CSMA/CD] Channel BUSY -> %s waits (attempt %d)%n",
-                        senderName, attempt + 1);
-                sleep(SLOT_TIME_MS);
-                continue;
+            // 🔹 STEP 1: Sense channel
+            System.out.println(sender + " sensing channel...");
+
+            while (channelBusy) {
+                System.out.println(sender + " found channel BUSY, waiting...");
+                sleep(200);
             }
 
-            // 2. Channel appears free — start transmitting
-            transmitting.add(senderMAC);
+            // 🔹 STEP 2: Start transmission
+            System.out.println(sender + " found channel IDLE, starting transmission...");
             channelBusy = true;
-            System.out.printf("  [CSMA/CD] Channel FREE  -> %s starts transmitting%n", senderName);
+            transmitting.add(sender);
 
-            // 3. COLLISION DETECTION: another transmitter snuck in simultaneously?
-            boolean collision = transmitting.size() > 1;
+            boolean collision = false;
 
+            // 🔹 STEP 3: Monitor DURING transmission
+            for (int t = 0; t < TRANSMISSION_TIME; t++) {
+
+                sleep(100); // simulate time passing
+
+                if (transmitting.size() > 1) {
+                    collision = true;
+                    break;
+                }
+            }
+
+            // 🔹 STEP 4: Collision handling
             if (collision) {
-                // JAM signal
-                System.out.printf("  [CSMA/CD] ⚡ COLLISION detected! JAM sent by %s%n", senderName);
-                transmitting.remove(senderMAC);
-                if (transmitting.isEmpty()) channelBusy = false;
+                System.out.println("⚡ COLLISION detected by " + sender + "! Sending JAM signal...");
+               
+                // JAM signal simulation
+                sleep(100);
 
-                // Binary Exponential Backoff
+                // Abort transmission
+                transmitting.remove(sender);
+                channelBusy = false;
+
+                attempt++;
+
+                // 🔹 STEP 5: Binary Exponential Backoff
                 int k = Math.min(attempt, 10);
-                int maxSlots = (int) Math.pow(2, k);
-                int backoff = rng.nextInt(maxSlots);
-                System.out.printf("  [CSMA/CD] BEB: k=%d, backoff=%d slots (%d ms)%n",
-                        k, backoff, backoff * SLOT_TIME_MS);
-                sleep(backoff * SLOT_TIME_MS);
+                int backoffSlots = (int) Math.pow(2, k);
+                int waitTime = rng.nextInt(backoffSlots);
 
-            } else {
-                // SUCCESS
-                System.out.printf("  [CSMA/CD] ✅ %s transmitting (no collision)%n", senderName);
-                // Simulate transmission time
-                sleep(SLOT_TIME_MS * 2);
-                transmitting.remove(senderMAC);
-                if (transmitting.isEmpty()) channelBusy = false;
-                return true;
+                System.out.println(sender + " backing off for " + waitTime + " slots...");
+
+                for (int i = 0; i < waitTime; i++) {
+                    sleep(100);
+                }
+
+                // 🔹 STEP 6: Retry (loop continues)
+            }
+            else {
+                // 🔹 SUCCESS
+                System.out.println(sender + " successfully transmitted: " + data);
+
+                transmitting.remove(sender);
+                channelBusy = false;
+                return;
             }
         }
 
-        System.out.printf("  [CSMA/CD] ❌ %s exceeded max retries - frame DROPPED%n", senderName);
-        return false;
+        System.out.println(sender + " failed after max retries.");
     }
 
-    /** Let another station "grab" the channel concurrently (for collision simulation) */
-    public static void simulateConcurrentTransmitter(String mac) {
-        transmitting.add(mac);
-        channelBusy = true;
+    // 🔹 Simulate another device transmitting (to force collision)
+    public static void simulateConcurrentTransmitter(String sender) {
+        transmitting.add(sender);
     }
 
-    /** Release a concurrent transmitter */
-    public static void releaseConcurrentTransmitter(String mac) {
-        transmitting.remove(mac);
-        if (transmitting.isEmpty()) channelBusy = false;
-    }
-
-    private static void sleep(int ms) {
-        // In simulation mode we don't actually sleep — just print
-        // Uncomment the next lines if you want real delays:
-        // try { Thread.sleep(ms); } catch (InterruptedException ignored) {}
+    public static void sleep(int ms) {
+        try {
+            Thread.sleep(ms);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
     }
 }

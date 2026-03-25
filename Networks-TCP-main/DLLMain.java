@@ -1,3 +1,4 @@
+
 import datalink.*;
 import datalink.error.*;
 import datalink.flowcontrol.*;
@@ -43,146 +44,156 @@ public class DLLMain {
     // =========================================================
     static void buildTopology() {
 
-    System.out.println("\nChoose device:");
-    System.out.println("1. Switch");
-    System.out.println("2. Bridge");
-    System.out.println("3. Hub (Physical Layer)");
+        System.out.println("\nChoose device:");
+        System.out.println("1. Switch");
+        System.out.println("2. Bridge");
+        System.out.println("3. Hub (Physical Layer)");
 
-    System.out.print("Choice: ");
+        System.out.print("Choice: ");
 
-    int choice = readInt();
+        int choice = readInt();
 
-    if (choice == 1) buildSwitch();
-    else if (choice == 2) buildBridge();
-    else if (choice == 3) runPhysicalLayer();   // 🔥 NEW
-}
+        if (choice == 1) {
+            buildSwitch(); 
+        }else if (choice == 2) {
+            buildBridge(); 
+        }else if (choice == 3) {
+            runPhysicalLayer();   // 🔥 NEW
 
-static void runPhysicalLayer() {
+            }}
 
-    Scanner sc = new Scanner(System.in);
+    static void runPhysicalLayer() {
 
-    // =========================
-    // CREATE DEVICES
-    // =========================
-    System.out.print("Enter number of stations: ");
-    int n = readInt();
+        Scanner sc = new Scanner(System.in);
 
-    EndStation[] stations = new EndStation[n];
+        // =========================
+        // CREATE DEVICES
+        // =========================
+        System.out.print("Enter number of stations: ");
+        int n = readInt();
 
-    for(int i = 0; i < n; i++){
-        System.out.print("Enter name of station " + (i+1) + ": ");
-        String name = sc.nextLine().trim();
-        if(name.isEmpty()) name = "D" + (i+1);
-        stations[i] = new EndStation(name);
-    }
+        EndStation[] stations = new EndStation[n];
 
-    // =========================
-    // TOPOLOGY
-    // =========================
-    System.out.println("\nChoose Topology:");
-    System.out.println("1. Direct Connection");
-    System.out.println("2. Star (Hub)");
+        for (int i = 0; i < n; i++) {
+            System.out.print("Enter name of station " + (i + 1) + ": ");
+            String name = sc.nextLine().trim();
+            if (name.isEmpty()) {
+                name = "D" + (i + 1);
+            }
+            stations[i] = new EndStation(name);
+        }
 
-    int topoChoice = readInt();
+        // =========================
+        // TOPOLOGY
+        // =========================
+        System.out.println("\nChoose Topology:");
+        System.out.println("1. Direct Connection");
+        System.out.println("2. Star (Hub)");
 
-    // =========================
-    // SENDER / RECEIVER
-    // =========================
-    System.out.print("\nEnter sender station: ");
-    String senderName = sc.nextLine();
+        int topoChoice = readInt();
 
-    System.out.print("Enter destination station: ");
-    String destName = sc.nextLine();
+        // =========================
+        // SENDER / RECEIVER
+        // =========================
+        System.out.print("\nEnter sender station: ");
+        String senderName = sc.nextLine();
 
-    // =========================
-    // DATA INPUT
-    // =========================
-    System.out.print("\nEnter data: ");
-    String data = sc.nextLine();
+        System.out.print("Enter destination station: ");
+        String destName = sc.nextLine();
 
-    System.out.println("\nOriginal Data: " + data);
-    System.out.println("Bit Representation: " + Utils.stringToBits(data));
+        // =========================
+        // DATA INPUT
+        // =========================
+        System.out.print("\nEnter data: ");
+        String data = sc.nextLine();
 
-    // =========================
-    // ENCODING
-    // =========================
-    System.out.println("\nSelect Encoding:");
-    System.out.println("1. NRZ-L");
-    System.out.println("2. NRZ-I");
-    System.out.println("3. Manchester");
+        System.out.println("\nOriginal Data: " + data);
+        System.out.println("Bit Representation: " + Utils.stringToBits(data));
 
-    int encChoice = readInt();
+        // =========================
+        // ENCODING
+        // =========================
+        System.out.println("\nSelect Encoding:");
+        System.out.println("1. NRZ-L");
+        System.out.println("2. NRZ-I");
+        System.out.println("3. Manchester");
 
-    String encoded = "";
+        int encChoice = readInt();
 
-    switch (encChoice) {
-        case 1 -> encoded = new NRZL().encode(data);
-        case 2 -> encoded = new NRZI().encode(data);
-        case 3 -> encoded = new Manchester().encode(data);
-    }
+        String encoded = "";
 
-    System.out.println("\nEncoded Signal:");
-    System.out.println(encoded);
+        switch (encChoice) {
+            case 1 ->
+                encoded = new NRZL().encode(data);
+            case 2 ->
+                encoded = new NRZI().encode(data);
+            case 3 ->
+                encoded = new Manchester().encode(data);
+        }
 
-    // WaveformDisplay.showWaveform(encoded);
+        System.out.println("\nEncoded Signal:");
+        System.out.println(encoded);
+
+        // WaveformDisplay.showWaveform(encoded);
 // =========================
 // CREATE FRAME
 // =========================
-Data d = new Data(senderName, destName, encoded);
+        Data d = new Data(senderName, destName, encoded);
 
 // =========================
 // FIND SENDER
 // =========================
-EndStation sender = null;
+        EndStation sender = null;
 
-for(EndStation s : stations){
-    if(s.stationName.equals(senderName)){
-        sender = s;
-        break;
-    }
-}
+        for (EndStation s : stations) {
+            if (s.stationName.equals(senderName)) {
+                sender = s;
+                break;
+            }
+        }
 
-if(sender == null){
-    System.out.println("Sender not found!");
-    return;
-}
+        if (sender == null) {
+            System.out.println("Sender not found!");
+            return;
+        }
 
 // =========================
 // TRANSMISSION
 // =========================
-System.out.println("\n--- DATA FLOW ---");
-System.out.println("Data -> Bits -> Encoded Signal -> Transmission");
+        System.out.println("\n--- DATA FLOW ---");
+        System.out.println("Data -> Bits -> Encoded Signal -> Transmission");
 
-System.out.println("\n--- Transmission Start ---");
+        System.out.println("\n--- Transmission Start ---");
 
 // 🔥 ALWAYS create hub (needed by your constructors)
-Hub hub = new Hub("HUB1");
+        Hub hub = new Hub("HUB1");
 
-if(topoChoice == 1){
+        if (topoChoice == 1) {
 
-    // ✅ DIRECT TOPOLOGY (FIXED)
-    DirectTopology direct = new DirectTopology(hub);
-    direct.connectDevices(stations);
-    direct.displayTopology(stations);
+            // ✅ DIRECT TOPOLOGY (FIXED)
+            DirectTopology direct = new DirectTopology(hub);
+            direct.connectDevices(stations);
+            direct.displayTopology(stations);
 
-    // simulate direct send
-    System.out.println("\n" + senderName + " sends data directly to " + destName);
+            // simulate direct send
+            System.out.println("\n" + senderName + " sends data directly to " + destName);
 
-} else {
+        } else {
 
-    // ✅ STAR TOPOLOGY (FIXED)
-    StarTopology st = new StarTopology(hub);
-    st.connectDevices(stations);
-    st.displayTopology(stations);
+            // ✅ STAR TOPOLOGY (FIXED)
+            StarTopology st = new StarTopology(hub);
+            st.connectDevices(stations);
+            st.displayTopology(stations);
 
-    // simulate hub behavior
-    System.out.println("\n" + senderName + " sends data to HUB");
+            // simulate hub behavior
+            System.out.println("\n" + senderName + " sends data to HUB");
 
 // ✅ REAL HUB BEHAVIOR ONLY
-hub.receiveAndTransmit(d, sender);
-}
+            hub.receiveAndTransmit(d, sender);
+        }
 
-System.out.println("--- Transmission End ---");}
+        System.out.println("--- Transmission End ---");
+    }
 
     // =========================================================
     // SWITCH BUILDER (WITH HUB + TOPOLOGY)
@@ -191,7 +202,9 @@ System.out.println("--- Transmission End ---");}
 
         System.out.print("\nEnter Switch Name: ");
         String name = sc.nextLine().trim();
-        if (name.isEmpty()) name = "SW1";
+        if (name.isEmpty()) {
+            name = "SW1";
+        }
 
         Switch sw = new Switch(name);
 
@@ -208,7 +221,9 @@ System.out.println("--- Transmission End ---");}
 
             System.out.print("\nEnter hub name: ");
             String hubName = sc.nextLine().trim();
-            if (hubName.isEmpty()) hubName = "HUB" + (h + 1);
+            if (hubName.isEmpty()) {
+                hubName = "HUB" + (h + 1);
+            }
 
             Hub hub = new Hub(hubName);
 
@@ -227,7 +242,9 @@ System.out.println("--- Transmission End ---");}
             for (int i = 0; i < n; i++) {
                 System.out.print("Device name: ");
                 String dname = sc.nextLine().trim();
-                if (dname.isEmpty()) dname = hubName + "_D" + (i + 1);
+                if (dname.isEmpty()) {
+                    dname = hubName + "_D" + (i + 1);
+                }
 
                 stations[i] = new EndStation(dname);
 
@@ -251,7 +268,7 @@ System.out.println("--- Transmission End ---");}
 
             hubMap.put(hubPort, devices);
 
-            System.out.println("✅ " + hubName + " connected to switch.");
+            System.out.println("OK " + hubName + " connected to switch.");
         }
 
         // ================================
@@ -266,7 +283,9 @@ System.out.println("--- Transmission End ---");}
             for (int i = 0; i < n; i++) {
                 System.out.print("Device name: ");
                 String dname = sc.nextLine().trim();
-                if (dname.isEmpty()) dname = "D" + (i + 1);
+                if (dname.isEmpty()) {
+                    dname = "D" + (i + 1);
+                }
 
                 DLLNode node = new DLLNode(dname, generateMAC(200 + i));
                 sw.connect(node);
@@ -274,7 +293,7 @@ System.out.println("--- Transmission End ---");}
             }
         }
 
-        System.out.println("\n✅ Network created successfully.");
+        System.out.println("\nOK  Network created successfully.");
 
         runNetwork(sw, hubMap, directDevices, hubCount);
     }
@@ -282,163 +301,180 @@ System.out.println("--- Transmission End ---");}
     // =========================================================
     // BRIDGE BUILDER (SAME STYLE MENU)
     // =========================================================
-static void buildBridge() {
+    static void buildBridge() {
 
-    Bridge br = new Bridge("BR1");
+        Bridge br = new Bridge("BR1");
 
-    Map<DLLNode, List<DLLNode>> hubMap = new HashMap<>();
-    List<DLLNode> directDevices = new ArrayList<>();
-
-    // =========================
-    // SIDE A
-    // =========================
-    System.out.println("\n--- CONFIGURE SIDE A ---");
-    setupBridgeSide(br, hubMap, directDevices, true);
-
-    // =========================
-    // SIDE B
-    // =========================
-    System.out.println("\n--- CONFIGURE SIDE B ---");
-    setupBridgeSide(br, hubMap, directDevices, false);
-
-    // =========================
-    // COLLECT ALL DEVICES
-    // =========================
-    List<DLLNode> all = new ArrayList<>();
-    hubMap.values().forEach(all::addAll);
-    all.addAll(directDevices);
-
-    DLLNode[] nodes = all.toArray(new DLLNode[0]);
-
-    // =========================
-    // MENU (UNCHANGED)
-    // =========================
-    boolean run = true;
-
-    while (run) {
-        System.out.println("\n--- BRIDGE MENU ---");
-        System.out.println("1. Send Unicast");
-        System.out.println("2. Broadcast");
-        System.out.println("3. CSMA/CD Demo");
-        System.out.println("4. Go-Back-N");
-        System.out.println("5. Show MAC Table");
-        System.out.println("6. Domain Summary");
-        System.out.println("7. Exit");
-
-        int ch = readInt();
-
-        switch (ch) {
-            case 1 -> {
-                DLLNode src = pickNode(nodes, "source");
-                DLLNode dst = pickNode(nodes, "destination");
-
-                Frame f = new Frame(dst.mac, src.mac, 0, "DATA");
-                ChecksumControl.attachChecksum(f);
-                br.processFrame(f, src);
-            }
-            case 2 -> {
-                DLLNode src = pickNode(nodes, "source");
-
-                Frame f = new Frame("FF:FF:FF:FF:FF:FF", src.mac, 0, "BROADCAST");
-                ChecksumControl.attachChecksum(f);
-                br.processFrame(f, src);
-            }
-            case 3 -> csmacdDemo(nodes);
-            case 4 -> goBackNDemo(nodes);
-            case 5 -> br.printMACTable();
-            case 6 -> br.printDomainSummary();
-            case 7 -> run = false;
-        }
-    }
-}    // NETWORK RUN
-  
-
-static void setupBridgeSide(Bridge br,
-                           Map<DLLNode, List<DLLNode>> hubMap,
-                           List<DLLNode> directDevices,
-                           boolean isSideA) {
-
-    System.out.println("1. Connect Hub");
-    System.out.println("2. Direct Devices");
-    int choice = readInt();
-
-    if (choice == 1) {
+        Map<DLLNode, List<DLLNode>> hubMap = new HashMap<>();
+        List<DLLNode> directDevices = new ArrayList<>();
 
         // =========================
-        // HUB
+        // SIDE A
         // =========================
-        System.out.print("Enter hub name: ");
-        String hubName = sc.nextLine().trim();
-        if (hubName.isEmpty()) hubName = "HUB";
+        System.out.println("\n--- CONFIGURE SIDE A ---");
+        setupBridgeSide(br, hubMap, directDevices, true);
 
-        Hub hub = new Hub(hubName);
+        // =========================
+        // SIDE B
+        // =========================
+        System.out.println("\n--- CONFIGURE SIDE B ---");
+        setupBridgeSide(br, hubMap, directDevices, false);
 
-        System.out.println("Choose topology:");
-        System.out.println("1. Star");
-        System.out.println("2. Direct");
-        int topo = readInt();
+        // =========================
+        // COLLECT ALL DEVICES
+        // =========================
+        List<DLLNode> all = new ArrayList<>();
+        hubMap.values().forEach(all::addAll);
+        all.addAll(directDevices);
 
-        System.out.print("How many devices in hub? ");
-        int n = readInt();
+        DLLNode[] nodes = all.toArray(new DLLNode[0]);
 
-        EndStation[] stations = new EndStation[n];
-        List<DLLNode> devices = new ArrayList<>();
+        // =========================
+        // MENU (UNCHANGED)
+        // =========================
+        boolean run = true;
 
-        for (int i = 0; i < n; i++) {
-            System.out.print("Device name: ");
-            String dname = sc.nextLine().trim();
-            if (dname.isEmpty()) dname = hubName + "_D" + (i + 1);
+        while (run) {
+            System.out.println("\n--- BRIDGE MENU ---");
+            System.out.println("1. Send Unicast");
+            System.out.println("2. Broadcast");
+            System.out.println("3. CSMA/CD Demo");
+            System.out.println("4. Go-Back-N");
+            System.out.println("5. Show MAC Table");
+            System.out.println("6. Domain Summary");
+            System.out.println("7. Exit");
 
-            stations[i] = new EndStation(dname);
+            int ch = readInt();
 
-            DLLNode node = new DLLNode(dname, generateMAC(i + 1));
-            devices.add(node);
+            switch (ch) {
+                case 1 -> {
+                    DLLNode src = pickNode(nodes, "source");
+                    DLLNode dst = pickNode(nodes, "destination");
+
+                    Frame f = new Frame(dst.mac, src.mac, 0, "DATA");
+                    ChecksumControl.attachChecksum(f);
+                    br.processFrame(f, src);
+                }
+                case 2 -> {
+                    DLLNode src = pickNode(nodes, "source");
+
+                    Frame f = new Frame("FF:FF:FF:FF:FF:FF", src.mac, 0, "BROADCAST");
+                    ChecksumControl.attachChecksum(f);
+                    br.processFrame(f, src);
+                }
+                case 3 ->
+                    csmacdDemo(nodes);
+                case 4 ->
+                    goBackNDemo(nodes);
+                case 5 ->
+                    br.printMACTable();
+                case 6 ->
+                    br.printDomainSummary();
+                case 7 ->
+                    run = false;
+            }
         }
+    }    // NETWORK RUN
 
-        // TOPOLOGY DISPLAY
-        if (topo == 1) {
-            StarTopology star = new StarTopology(hub);
-            star.connectDevices(stations);
-            star.displayTopology(stations);
+    static void setupBridgeSide(Bridge br,
+            Map<DLLNode, List<DLLNode>> hubMap,
+            List<DLLNode> directDevices,
+            boolean isSideA) {
+
+        System.out.println("1. Connect Hub");
+        System.out.println("2. Direct Devices");
+        int choice = readInt();
+
+        if (choice == 1) {
+
+            // =========================
+            // HUB
+            // =========================
+            System.out.print("Enter hub name: ");
+            String hubName = sc.nextLine().trim();
+            if (hubName.isEmpty()) {
+                hubName = "HUB";
+            }
+
+            Hub hub = new Hub(hubName);
+
+            System.out.println("Choose topology:");
+            System.out.println("1. Star");
+            System.out.println("2. Direct");
+            int topo = readInt();
+
+            System.out.print("How many devices in hub? ");
+            int n = readInt();
+
+            EndStation[] stations = new EndStation[n];
+            List<DLLNode> devices = new ArrayList<>();
+
+            for (int i = 0; i < n; i++) {
+                System.out.print("Device name: ");
+                String dname = sc.nextLine().trim();
+                if (dname.isEmpty()) {
+                    dname = hubName + "_D" + (i + 1);
+                }
+
+                stations[i] = new EndStation(dname);
+
+                DLLNode node = new DLLNode(dname, generateMAC(i + 1));
+                devices.add(node);
+            }
+
+            // TOPOLOGY DISPLAY
+            if (topo == 1) {
+                StarTopology star = new StarTopology(hub);
+                star.connectDevices(stations);
+                star.displayTopology(stations);
+            } else {
+                DirectTopology direct = new DirectTopology(hub);
+                direct.connectDevices(stations);
+                direct.displayTopology(stations);
+            }
+
+            DLLNode port = new DLLNode(hubName + "-PORT", generateMAC(100));
+
+            if (isSideA) {
+                br.connectToSideA(port); 
+            }else {
+                br.connectToSideB(port);
+            }
+
+            hubMap.put(port, devices);
+
         } else {
-            DirectTopology direct = new DirectTopology(hub);
-            direct.connectDevices(stations);
-            direct.displayTopology(stations);
+
+            // =========================
+            // DIRECT DEVICES
+            // =========================
+            System.out.print("How many devices? ");
+            int n = readInt();
+
+            for (int i = 0; i < n; i++) {
+                System.out.print("Device name: ");
+                String dname = sc.nextLine().trim();
+                if (dname.isEmpty()) {
+                    dname = "D" + (i + 1);
+                }
+
+                DLLNode node = new DLLNode(dname, generateMAC(200 + i));
+
+                if (isSideA) {
+                    br.connectToSideA(node); 
+                }else {
+                    br.connectToSideB(node);
+                }
+
+                directDevices.add(node);
+            }
         }
+    }// =========================================================
 
-        DLLNode port = new DLLNode(hubName + "-PORT", generateMAC(100));
-
-        if (isSideA) br.connectToSideA(port);
-        else br.connectToSideB(port);
-
-        hubMap.put(port, devices);
-
-    } else {
-
-        // =========================
-        // DIRECT DEVICES
-        // =========================
-        System.out.print("How many devices? ");
-        int n = readInt();
-
-        for (int i = 0; i < n; i++) {
-            System.out.print("Device name: ");
-            String dname = sc.nextLine().trim();
-            if (dname.isEmpty()) dname = "D" + (i + 1);
-
-            DLLNode node = new DLLNode(dname, generateMAC(200 + i));
-
-            if (isSideA) br.connectToSideA(node);
-            else br.connectToSideB(node);
-
-            directDevices.add(node);
-        }
-    }
-}// =========================================================
     static void runNetwork(Switch sw,
-                           Map<DLLNode, List<DLLNode>> hubMap,
-                           List<DLLNode> directDevices,
-                           int hubCount) {
+            Map<DLLNode, List<DLLNode>> hubMap,
+            List<DLLNode> directDevices,
+            int hubCount) {
 
         List<DLLNode> all = new ArrayList<>();
         hubMap.values().forEach(all::addAll);
@@ -459,23 +495,29 @@ static void setupBridgeSide(Bridge br,
         while (run) {
             System.out.println("\n--- SWITCH MENU ---");
             System.out.println("1. Send Unicast");
-            System.out.println("2. Broadcast");
-            System.out.println("3. CSMA/CD Demo");
-            System.out.println("4. Go-Back-N");
-            System.out.println("5. Show MAC Table");
-            System.out.println("6. Domain Summary");
-            System.out.println("7. Exit");
+            System.out.println("2. CSMA/CD Demo");
+            System.out.println("3. Go-Back-N");
+            System.out.println("4. Show MAC Table");
+            System.out.println("5. Domain Summary");
+            System.out.println("6. Exit");
 
             int ch = readInt();
 
             switch (ch) {
-                case 1 -> sendUnicast(nodes, sw);
-                case 2 -> sendBroadcast(nodes, sw);
-                case 3 -> csmacdDemo(nodes);
-                case 4 -> goBackNDemo(nodes);
-                case 5 -> sw.printMACTable();
-                case 6 -> printDomains(nodes, hubCount);
-                case 7 -> run = false;
+                case 1 ->
+                    sendUnicast(nodes, sw);
+                // case 2 ->
+                //     sendBroadcast(nodes, sw);
+                case 2 ->
+                    csmacdDemo(nodes);
+                case 3 ->
+                    goBackNDemo(nodes);
+                case 4 ->
+                    sw.printMACTable();
+                case 5 ->
+                    printDomains(nodes, hubCount);
+                case 6 ->
+                    run = false;
             }
         }
     }
@@ -487,7 +529,7 @@ static void setupBridgeSide(Bridge br,
 
         int collisionDomains = (hubCount == 0) ? nodes.length : hubCount;
 
-        System.out.println("\n📊 DOMAIN SUMMARY");
+        System.out.println("\n DOMAIN SUMMARY");
         System.out.println("Broadcast Domains: 1");
         System.out.println("Collision Domains: " + collisionDomains);
     }
@@ -495,47 +537,88 @@ static void setupBridgeSide(Bridge br,
     // =========================================================
     // EXISTING FUNCTIONS
     // =========================================================
-
     static void sendUnicast(DLLNode[] nodes, Switch sw) {
-        DLLNode src = pickNode(nodes, "source");
-        DLLNode dst = pickNode(nodes, "destination");
 
-        Frame f = new Frame(dst.mac, src.mac, 0, "DATA");
-        ChecksumControl.attachChecksum(f);
-        sw.processFrame(f, src);
+    DLLNode src = pickNode(nodes, "source");
+    DLLNode dst = pickNode(nodes, "destination");
+
+    System.out.println("\n--- TRANSMISSION START ---");
+
+    // Create frame
+    Frame f = new Frame(dst.mac, src.mac, 0, "DATA");
+    ChecksumControl.attachChecksum(f);
+
+    // 🔥 ONLY THIS LINE DOES EVERYTHING
+    sw.processFrame(f, src);
+
+    System.out.println("--- TRANSMISSION END ---");
+}
+   static void sendBroadcast(DLLNode[] nodes, Switch sw) {
+
+    DLLNode src = pickNode(nodes, "source");
+
+    System.out.println("\n--- BROADCAST START ---");
+
+    // Create broadcast frame
+    Frame f = new Frame("FF:FF:FF:FF:FF:FF", src.mac, 0, "BROADCAST");
+    ChecksumControl.attachChecksum(f);
+
+    // STEP 1: Sender → Switch
+    System.out.println(src.name + " → Switch : Broadcast Frame Sent");
+
+    // STEP 2: Switch learns source MAC
+    System.out.println("Switch learns MAC: " + src.mac);
+
+    // STEP 3: Broadcast to all
+    System.out.println("Switch broadcasts to all ports...");
+
+    for (DLLNode node : nodes) {
+
+        if (!node.equals(src)) {
+
+            System.out.println("Switch → " + node.name);
+
+            // All nodes accept broadcast
+            System.out.println("✔ " + node.name + " receives broadcast");
+
+            // checksum verification
+            if (ChecksumControl.verify(f)) {
+                System.out.println("Checksum OK ");
+            } else {
+                System.out.println("Checksum ERROR ");
+            }
+
+            // optional learning (not strictly needed for broadcast)
+            System.out.println(node.name + " processes broadcast");
+        }
     }
 
-    static void sendBroadcast(DLLNode[] nodes, Switch sw) {
-        DLLNode src = pickNode(nodes, "source");
-
-        Frame f = new Frame("FF:FF:FF:FF:FF:FF", src.mac, 0, "BROADCAST");
-        ChecksumControl.attachChecksum(f);
-        sw.processFrame(f, src);
-    }
+    System.out.println("--- BROADCAST END ---");
+}
 
     static void csmacdDemo(DLLNode[] nodes) {
         DLLNode a = pickNode(nodes, "node A");
         DLLNode b = pickNode(nodes, "node B");
 
-        CSMACD.reset();
+        CSMACD.sleep(1000);
         CSMACD.simulateConcurrentTransmitter(b.mac);
         CSMACD.transmit(a.name, a.mac);
-        CSMACD.releaseConcurrentTransmitter(b.mac);
+        CSMACD.simulateConcurrentTransmitter(b.mac);
     }
 
     static void goBackNDemo(DLLNode[] nodes) {
         DLLNode src = pickNode(nodes, "sender");
         DLLNode dst = pickNode(nodes, "receiver");
-List<String> data = Arrays.asList(
-    "HELLO",
-    "WORLD",
-    "TEST",
-    "GBN",
-    "NETWORK"
-);
+        List<String> data = Arrays.asList(
+                "HELLO",
+                "WORLD",
+                "TEST",
+                "GBN",
+                "NETWORK"
+        );
 
-GoBackN gbn = new GoBackN(3, 0.2);
-gbn.send(data, "d1", "00:0A:00:00:00:01", "d2", "00:0A:00:00:00:02");
+        GoBackN gbn = new GoBackN(3, 0.2);
+        gbn.send(data, "d1", "00:0A:00:00:00:01", "d2", "00:0A:00:00:00:02");
     }
 
     // =========================================================
@@ -543,15 +626,17 @@ gbn.send(data, "d1", "00:0A:00:00:00:01", "d2", "00:0A:00:00:00:02");
     // =========================================================
     static DLLNode[] createNodes(int n) {
         DLLNode[] nodes = new DLLNode[n];
-        for (int i = 0; i < n; i++)
+        for (int i = 0; i < n; i++) {
             nodes[i] = new DLLNode("D" + (i + 1), generateMAC(i + 1));
+        }
         return nodes;
     }
 
     static DLLNode pickNode(DLLNode[] nodes, String role) {
         System.out.println("\nSelect " + role + ":");
-        for (int i = 0; i < nodes.length; i++)
+        for (int i = 0; i < nodes.length; i++) {
             System.out.println((i + 1) + ". " + nodes[i].name);
+        }
         return nodes[readInt() - 1];
     }
 

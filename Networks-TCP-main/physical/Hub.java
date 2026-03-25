@@ -27,10 +27,10 @@ for (EndStation s : devices) {
     System.out.println(" -> Signal reaches " + s.stationName);
 
     if (s.stationName.equals(d.dest)) {
-        System.out.println("    ✅ " + s.stationName + " ACCEPTS data");
+        System.out.println("    OK " + s.stationName + " ACCEPTS data");
         s.check(d);
     } else {
-        System.out.println("    ❌ " + s.stationName + " DISCARDS data");
+        System.out.println("    NO " + s.stationName + " DISCARDS data");
     }
 }
     }

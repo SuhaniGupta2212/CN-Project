@@ -79,7 +79,7 @@ public class GoBackN {
                 // ✅ Correct frame
                 if (!f.isCorrupted() && f.seqNum == expected) {
 
-                    System.out.printf("  [RECEIVER] ✅ Accepted seq=%d -> ACK %d\n",
+                    System.out.printf("  [RECEIVER] OK Accepted seq=%d -> ACK %d\n",
                             f.seqNum, f.seqNum);
 
                     Frame ack = new Frame(srcMAC, destMAC, f.seqNum, true, false);
@@ -116,7 +116,7 @@ public class GoBackN {
             }
         }
 
-        System.out.printf("\n  [GBN] ✅ All %d frames successfully delivered to %s\n",
+        System.out.printf("\n  [GBN] OK All %d frames successfully delivered to %s\n",
                 total, destName);
     }
 }

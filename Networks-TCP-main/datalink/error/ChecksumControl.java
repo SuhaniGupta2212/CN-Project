@@ -22,6 +22,6 @@ public class ChecksumControl {
         int recomputed = Frame.computeChecksum(f.data);
         System.out.printf("  [CHECKSUM] Frame seq=%-2d | Embedded=0x%02X | Computed=0x%02X | %s%n",
                 f.seqNum, f.checksum, recomputed,
-                f.isCorrupted() ? "❌ CORRUPTED" : "✅ OK");
+                f.isCorrupted() ? "NO CORRUPTED" : " OK");
     }
 }

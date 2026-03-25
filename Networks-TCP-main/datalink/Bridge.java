@@ -94,7 +94,7 @@ public class Bridge {
             for (DLLNode n : targetSide) {
                 if (n.mac.equals(frame.destMAC)) {
                     n.receive(frame);
-                    System.out.printf("  [BRIDGE %s] ✅ Forwarded to %s (Side-%s)%n", name, n.name, destSide);
+                    System.out.printf("  [BRIDGE %s] OK  Forwarded to %s (Side-%s)%n", name, n.name, destSide);
                 }
             }
         }
