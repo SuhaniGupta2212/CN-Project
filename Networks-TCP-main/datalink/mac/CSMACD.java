@@ -43,7 +43,7 @@ public class CSMACD {
 
             // 1. CARRIER SENSE
             if (channelBusy) {
-                System.out.printf("  [CSMA/CD] Channel BUSY → %s waits (attempt %d)%n",
+                System.out.printf("  [CSMA/CD] Channel BUSY -> %s waits (attempt %d)%n",
                         senderName, attempt + 1);
                 sleep(SLOT_TIME_MS);
                 continue;
@@ -52,7 +52,7 @@ public class CSMACD {
             // 2. Channel appears free — start transmitting
             transmitting.add(senderMAC);
             channelBusy = true;
-            System.out.printf("  [CSMA/CD] Channel FREE  → %s starts transmitting%n", senderName);
+            System.out.printf("  [CSMA/CD] Channel FREE  -> %s starts transmitting%n", senderName);
 
             // 3. COLLISION DETECTION: another transmitter snuck in simultaneously?
             boolean collision = transmitting.size() > 1;
@@ -82,7 +82,7 @@ public class CSMACD {
             }
         }
 
-        System.out.printf("  [CSMA/CD] ❌ %s exceeded max retries — frame DROPPED%n", senderName);
+        System.out.printf("  [CSMA/CD] ❌ %s exceeded max retries - frame DROPPED%n", senderName);
         return false;
     }
 

@@ -79,7 +79,7 @@ public class GoBackN {
                 // ✅ Correct frame
                 if (!f.isCorrupted() && f.seqNum == expected) {
 
-                    System.out.printf("  [RECEIVER] ✅ Accepted seq=%d → ACK %d\n",
+                    System.out.printf("  [RECEIVER] ✅ Accepted seq=%d -> ACK %d\n",
                             f.seqNum, f.seqNum);
 
                     Frame ack = new Frame(srcMAC, destMAC, f.seqNum, true, false);
@@ -92,13 +92,13 @@ public class GoBackN {
                 // ❌ Error or out-of-order
                 else {
 
-                    System.out.printf("  [RECEIVER] ❌ Error at seq=%d → sending ACK %d\n",
+                    System.out.printf("  [RECEIVER] ❌ Error at seq=%d -> sending ACK %d\n",
                             f.seqNum, expected - 1);
 
                     Frame ack = new Frame(srcMAC, destMAC, expected - 1, true, false);
                     System.out.printf("  [RECEIVER] 📤 %s\n", ack);
 
-                    System.out.printf("  [SENDER ] ⏳ Timeout → Go-Back to seq=%d\n\n", base);
+                    System.out.printf("  [SENDER ] ⏳ Timeout -> Go-Back to seq=%d\n\n", base);
 
                     // Reset frames from base (simulate retransmission)
                     for (int j = base; j < total; j++) {

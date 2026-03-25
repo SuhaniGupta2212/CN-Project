@@ -124,7 +124,7 @@ static void runPhysicalLayer() {
     System.out.println("\nEncoded Signal:");
     System.out.println(encoded);
 
-    WaveformDisplay.showWaveform(encoded);
+    // WaveformDisplay.showWaveform(encoded);
 // =========================
 // CREATE FRAME
 // =========================
@@ -177,13 +177,9 @@ if(topoChoice == 1){
 
     // simulate hub behavior
     System.out.println("\n" + senderName + " sends data to HUB");
-    System.out.println("HUB broadcasts to all devices:");
 
-    for (EndStation s : stations) {
-        if (!s.stationName.equals(senderName)) {
-            System.out.println("-> " + s.stationName + " receives data");
-        }
-    }
+// ✅ REAL HUB BEHAVIOR ONLY
+hub.receiveAndTransmit(d, sender);
 }
 
 System.out.println("--- Transmission End ---");}

@@ -18,7 +18,7 @@ public class Bridge {
     private final List<DLLNode> sideA = new ArrayList<>();
     private final List<DLLNode> sideB = new ArrayList<>();
 
-    // MAC → side learning table
+    // MAC -> side learning table
     private final Map<String, String> macTable = new LinkedHashMap<>();
 
     public Bridge(String name) {
@@ -27,17 +27,17 @@ public class Bridge {
 
     public void connectToSideA(DLLNode node) {
         sideA.add(node);
-        System.out.printf("  [BRIDGE %s] Side-A ← %s%n", name, node);
+        System.out.printf("  [BRIDGE %s] Side-A <- %s%n", name, node);
     }
 
     public void connectToSideB(DLLNode node) {
         sideB.add(node);
-        System.out.printf("  [BRIDGE %s] Side-B ← %s%n", name, node);
+        System.out.printf("  [BRIDGE %s] Side-B <- %s%n", name, node);
     }
 
     public void printMACTable() {
         System.out.printf("%n  ╔═════════════════════════════════╗%n");
-        System.out.printf("  ║  Bridge %s — MAC Table           ║%n", name);
+        System.out.printf("  ║  Bridge %s - MAC Table           ║%n", name);
         System.out.printf("  ╠══════════════╦══════════════════╣%n");
         System.out.printf("  ║   MAC        ║   Side           ║%n");
         System.out.printf("  ╠══════════════╬══════════════════╣%n");
@@ -48,7 +48,7 @@ public class Bridge {
 
     public void printDomainSummary() {
         System.out.printf("%n  ╔═════════════════════════════════╗%n");
-        System.out.printf("  ║  Bridge %s — Domain Summary      ║%n", name);
+        System.out.printf("  ║  Bridge %s - Domain Summary      ║%n", name);
         System.out.printf("  ╠═════════════════════════════════╣%n");
         System.out.printf("  ║  Broadcast Domains  : 1          ║%n");
         System.out.printf("  ║  Collision Domains  : 2          ║%n");
@@ -72,23 +72,23 @@ public class Bridge {
         // Learn
         if (!macTable.containsKey(frame.srcMAC)) {
             macTable.put(frame.srcMAC, senderSide);
-            System.out.printf("  [BRIDGE %s] 📚 Learned: %s → Side-%s%n", name, frame.srcMAC, senderSide);
+            System.out.printf("  [BRIDGE %s] 📚 Learned: %s -> Side-%s%n", name, frame.srcMAC, senderSide);
         }
 
         String destSide = macTable.get(frame.destMAC);
 
         if (frame.destMAC.equals("FF:FF:FF:FF:FF:FF")) {
             // Broadcast: flood to all other nodes
-            System.out.printf("  [BRIDGE %s] 📢 Broadcast — forwarding to all%n", name);
+            System.out.printf("  [BRIDGE %s] 📢 Broadcast - forwarding to all%n", name);
             forwardToAll(frame, sender);
             return;
         }
 
         if (destSide == null) {
-            System.out.printf("  [BRIDGE %s] ❓ Unknown dest — flooding%n", name);
+            System.out.printf("  [BRIDGE %s] ❓ Unknown dest - flooding%n", name);
             forwardToAll(frame, sender);
         } else if (destSide.equals(senderSide)) {
-            System.out.printf("  [BRIDGE %s] 🚫 Dest on same side (%s) — filtered%n", name, senderSide);
+            System.out.printf("  [BRIDGE %s] 🚫 Dest on same side (%s) - filtered%n", name, senderSide);
         } else {
             List<DLLNode> targetSide = destSide.equals("A") ? sideA : sideB;
             for (DLLNode n : targetSide) {
@@ -102,10 +102,10 @@ public class Bridge {
 
     private void forwardToAll(Frame frame, DLLNode sender) {
         for (DLLNode n : sideA) {
-            if (n != sender) { n.receive(frame); System.out.printf("  [BRIDGE %s] ➡️  → %s (A)%n", name, n.name); }
+            if (n != sender) { n.receive(frame); System.out.printf("  [BRIDGE %s] ➡️  -> %s (A)%n", name, n.name); }
         }
         for (DLLNode n : sideB) {
-            if (n != sender) { n.receive(frame); System.out.printf("  [BRIDGE %s] ➡️  → %s (B)%n", name, n.name); }
+            if (n != sender) { n.receive(frame); System.out.printf("  [BRIDGE %s] ➡️  -> %s (B)%n", name, n.name); }
         }
     }
 

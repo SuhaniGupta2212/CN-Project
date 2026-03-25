@@ -30,7 +30,7 @@ public class Switch {
         int port = ports.size() + 1;
         ports.put(port, node);
 
-        System.out.printf("  [SWITCH %s] Port %-2d ← connected to %s%n",
+        System.out.printf("  [SWITCH %s] Port %-2d <- connected to %s%n",
                 name, port, node.name);
 
         return port;
@@ -84,7 +84,7 @@ public class Switch {
         if (!macTable.containsKey(f.srcMAC)) {
             macTable.put(f.srcMAC, inPort);
 
-            System.out.printf("  [SWITCH %s] 📚 Learned: %s → Port %d%n",
+            System.out.printf("  [SWITCH %s] 📚 Learned: %s -> Port %d%n",
                     name, f.srcMAC, inPort);
         }
        
@@ -94,7 +94,7 @@ public class Switch {
         // ================================
         if (f.destMAC.equals("FF:FF:FF:FF:FF:FF")) {
 
-            System.out.printf("  [SWITCH %s] 📢 Broadcast → flooding%n", name);
+            System.out.printf("  [SWITCH %s] 📢 Broadcast -> flooding%n", name);
 
             for (Map.Entry<Integer, DLLNode> e : ports.entrySet()) {
                 if (e.getKey() != inPort) {
@@ -118,7 +118,7 @@ public class Switch {
         // UNKNOWN → FLOOD
         if (destPort == null) {
 
-            System.out.printf("  [SWITCH %s] ❓ Unknown dest %s → flooding%n",
+            System.out.printf("  [SWITCH %s] ❓ Unknown dest %s -> flooding%n",
                     name, f.destMAC);
 
             for (Map.Entry<Integer, DLLNode> e : ports.entrySet()) {
@@ -135,7 +135,7 @@ public class Switch {
         // SAME PORT → DROP
         else if (destPort == inPort) {
 
-            System.out.printf("  [SWITCH %s] 🚫 Same port → frame dropped%n", name);
+            System.out.printf("  [SWITCH %s] 🚫 Same port -> frame dropped%n", name);
         }
 
         // KNOWN → DIRECT UNICAST

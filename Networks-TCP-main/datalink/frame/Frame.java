@@ -54,9 +54,9 @@ public class Frame {
 
     @Override
     public String toString() {
-        if (isACK) return String.format("[ACK  | seq=%d | %s → %s]", ackNum, srcMAC, destMAC);
-        if (isNAK) return String.format("[NAK  | seq=%d | %s → %s]", ackNum, srcMAC, destMAC);
-        return String.format("[FRAME| seq=%-2d | %s → %s | data=\"%s\" | chk=0x%02X]",
+        if (isACK) return String.format("[ACK  | seq=%d | %s -> %s]", ackNum, srcMAC, destMAC);
+        if (isNAK) return String.format("[NAK  | seq=%d | %s -> %s]", ackNum, srcMAC, destMAC);
+        return String.format("[FRAME| seq=%-2d | %s -> %s | data=\"%s\" | chk=0x%02X]",
                 seqNum, srcMAC, destMAC, data, checksum);
     }
 }

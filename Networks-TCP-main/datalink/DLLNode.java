@@ -43,7 +43,7 @@ public class DLLNode {
     System.out.println(name + " received: " + f.data);
 }
     else {
-        System.out.println("[RECEIVER " + name + "] ❌ Corrupted → Dropped");
+        System.out.println("[RECEIVER " + name + "] ❌ Corrupted -> Dropped");
     }
 }
     /** Pull all received frames (clears the buffer) */
