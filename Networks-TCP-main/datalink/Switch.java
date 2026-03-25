@@ -39,21 +39,26 @@ public class Switch {
     // ================================
     // MAC TABLE
     // ================================
-    public void printMACTable() {
-        System.out.println("\n=== MAC TABLE ===");
+   public void printMACTable() {
+    System.out.println("\n=== MAC TABLE ===");
 
-        if (macTable.isEmpty()) {
-            System.out.println("(empty)");
-            return;
-        }
-
-        for (Map.Entry<String, Integer> e : macTable.entrySet()) {
-            DLLNode node = ports.get(e.getValue());
-            System.out.println(e.getKey() + " → Port " + e.getValue()
-                    + " (" + node.name + ")");
-        }
+    if (macTable.isEmpty()) {
+        System.out.println("MAC Table is empty.");
+        return;
     }
 
+    for (Map.Entry<String, Integer> entry : macTable.entrySet()) {
+
+    String mac = entry.getKey();
+    Integer port = entry.getValue();
+
+    if (port == null) {
+        System.out.println(mac + " -> UNKNOWN");
+    } else {
+        System.out.println(mac + " -> PORT " + port);
+    }
+}
+}
     // ================================
     // DOMAIN SUMMARY
     // ================================
@@ -82,6 +87,7 @@ public class Switch {
             System.out.printf("  [SWITCH %s] 📚 Learned: %s → Port %d%n",
                     name, f.srcMAC, inPort);
         }
+       
 
         // ================================
         // BROADCAST

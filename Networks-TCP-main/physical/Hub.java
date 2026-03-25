@@ -8,7 +8,6 @@ public class Hub {
     public String name;
     List<EndStation> devices = new ArrayList<>();
 
-    // ✅ ADD THIS CONSTRUCTOR
     public Hub(String name) {
         this.name = name;
     }
@@ -19,12 +18,20 @@ public class Hub {
 
     public void receiveAndTransmit(Data d, EndStation sender) {
 
-        System.out.println("\n[HUB " + name + "] Broadcasting...");
+       System.out.println("\n[HUB " + name + "] Broadcasting signal...");
 
-        for (EndStation s : devices) {
-            if (s != sender) {
-                s.check(d);
-            }
-        }
+for (EndStation s : devices) {
+
+    if (s == sender) continue;
+
+    System.out.println(" -> Signal reaches " + s.stationName);
+
+    if (s.stationName.equals(d.dest)) {
+        System.out.println("    ✅ " + s.stationName + " ACCEPTS data");
+        s.check(d);
+    } else {
+        System.out.println("    ❌ " + s.stationName + " DISCARDS data");
+    }
+}
     }
 }

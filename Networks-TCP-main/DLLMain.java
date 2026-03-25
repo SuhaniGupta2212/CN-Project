@@ -151,7 +151,7 @@ if(sender == null){
 // TRANSMISSION
 // =========================
 System.out.println("\n--- DATA FLOW ---");
-System.out.println("Data → Bits → Encoded Signal → Transmission");
+System.out.println("Data -> Bits -> Encoded Signal -> Transmission");
 
 System.out.println("\n--- Transmission Start ---");
 
@@ -181,7 +181,7 @@ if(topoChoice == 1){
 
     for (EndStation s : stations) {
         if (!s.stationName.equals(senderName)) {
-            System.out.println("→ " + s.stationName + " receives data");
+            System.out.println("-> " + s.stationName + " receives data");
         }
     }
 }
@@ -530,9 +530,16 @@ static void setupBridgeSide(Bridge br,
     static void goBackNDemo(DLLNode[] nodes) {
         DLLNode src = pickNode(nodes, "sender");
         DLLNode dst = pickNode(nodes, "receiver");
+List<String> data = Arrays.asList(
+    "HELLO",
+    "WORLD",
+    "TEST",
+    "GBN",
+    "NETWORK"
+);
 
-        GoBackN gbn = new GoBackN(3, 0.2);
-        gbn.send(List.of("HELLO"), src.name, src.mac, dst.name, dst.mac);
+GoBackN gbn = new GoBackN(3, 0.2);
+gbn.send(data, "d1", "00:0A:00:00:00:01", "d2", "00:0A:00:00:00:02");
     }
 
     // =========================================================
